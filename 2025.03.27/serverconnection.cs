@@ -9,42 +9,47 @@ using System.Windows;
 
 namespace _2025._03._27
 {
-   public  class serverconnection
+    public class serverconnection
     {
         HttpClient client = new HttpClient();
+        public List<jasondata> all = new List<jasondata>();
         string serverUrl = "";
         public serverconnection(string serverUrl)
         {
             this.serverUrl = serverUrl;
         }
-        public async Task<List<string>> Kolbaszok()
+        public async Task<List<jasondata>> Kolbaszok()
         {
-            List<string> all = new List<string>();
+            List<jasondata> allkolbi = new List<jasondata>();
+
             string url = serverUrl + "/kolbaszok";
             try
             {
                 HttpResponseMessage response = await client.GetAsync(url);
                 response.EnsureSuccessStatusCode();
                 string result = await response.Content.ReadAsStringAsync();
-                all = JsonConvert.DeserializeObject<List<jasondata>>(result).Select(item => item.kolbaszNeve).ToList();
-                result.ToList();
+                allkolbi = JsonConvert.DeserializeObject<List<jasondata>>(result).ToList();
+
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
             }
-            return all;
+
+            return allkolbi;
         }
-        public async Task<bool> Register(int kolbaszAra, string kolbaszNeve,float kolbaszErtekelese)
+
+
+        public async Task<bool> Register(string kolbaszNeve,  int kolbaszAra, float kolbaszErtekelese)
         {
             string url = serverUrl + "/createKolbasz";
             try
             {
                 var jsonInfo = new
                 {
-                    name = kolbaszNeve,
-                    ara = kolbaszAra,
-                    ertekeles = kolbaszErtekelese
+                    kolbaszNeve = kolbaszNeve,
+                    kolbaszErtekelese = kolbaszErtekelese,
+                    kolbaszAra = kolbaszAra
                 };
                 string jsonStringified = JsonConvert.SerializeObject(jsonInfo);
                 HttpContent sendThis = new StringContent(jsonStringified, Encoding.UTF8, "Application/json");
@@ -52,7 +57,7 @@ namespace _2025._03._27
                 response.EnsureSuccessStatusCode();
                 string result = await response.Content.ReadAsStringAsync();
                 jasondata data = JsonConvert.DeserializeObject<jasondata>(result);
-               
+
                 return true;
 
             }
@@ -63,27 +68,26 @@ namespace _2025._03._27
             }
             return false;
         }
-        public async Task<bool> deleteklbasz(int id)
+        public async Task<bool> deleteKolbi(int id)
         {
-            string url = serverUrl + "/deleteKolbasz/:id";
+            string url = serverUrl + "/deleteKolbasz/" + id;
             try
             {
-                var jsonInfo = new { id= id };
-                string jsonStringified = JsonConvert.SerializeObject(jsonInfo);
-                HttpContent sendThis = new StringContent(jsonStringified, Encoding.UTF8, "Application/json");
-                HttpResponseMessage response = await client.PostAsync(url, sendThis);
+                HttpResponseMessage response = await client.DeleteAsync(url);
                 response.EnsureSuccessStatusCode();
                 string result = await response.Content.ReadAsStringAsync();
-                jasondata data = JsonConvert.DeserializeObject<jasondata>(result);
+
                 return true;
             }
             catch (Exception e)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(e.Message);
+                Console.ForegroundColor = ConsoleColor.White;
             }
-
             return false;
         }
-
     }
+
 }
+
