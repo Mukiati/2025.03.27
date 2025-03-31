@@ -9,24 +9,26 @@ using System.Windows;
 
 namespace _2025._03._27
 {
-   public  class serverconnection
+   public class serverconnection
     {
         HttpClient client = new HttpClient();
+        public List<jasondata> all = new List<jasondata>();
         string serverUrl = "";
         public serverconnection(string serverUrl)
         {
             this.serverUrl = serverUrl;
         }
-        public async Task<List<string>> Kolbaszok()
+        public async Task<List<jasondata>> Kolbaszok()
         {
-            List<string> all = new List<string>();
+           
+           
             string url = serverUrl + "/kolbaszok";
             try
             {
                 HttpResponseMessage response = await client.GetAsync(url);
                 response.EnsureSuccessStatusCode();
                 string result = await response.Content.ReadAsStringAsync();
-                all = JsonConvert.DeserializeObject<List<jasondata>>(result).Select(item => item.kolbaszNeve).ToList();
+              
                 result.ToList();
             }
             catch (Exception e)
@@ -35,16 +37,18 @@ namespace _2025._03._27
             }
             return all;
         }
-        public async Task<bool> Register(int kolbaszAra, string kolbaszNeve,float kolbaszErtekelese)
+
+
+        public async Task<bool> Register(string name, float rate, int price)
         {
             string url = serverUrl + "/createKolbasz";
             try
             {
                 var jsonInfo = new
                 {
-                    name = kolbaszNeve,
-                    ara = kolbaszAra,
-                    ertekeles = kolbaszErtekelese
+                    kolbaszNeve = name,
+                    kolbaszErtekelese = rate,
+                    kolbaszAra = price
                 };
                 string jsonStringified = JsonConvert.SerializeObject(jsonInfo);
                 HttpContent sendThis = new StringContent(jsonStringified, Encoding.UTF8, "Application/json");
@@ -68,13 +72,10 @@ namespace _2025._03._27
             string url = serverUrl + "/deleteKolbasz/:id";
             try
             {
-                var jsonInfo = new { id= id };
-                string jsonStringified = JsonConvert.SerializeObject(jsonInfo);
-                HttpContent sendThis = new StringContent(jsonStringified, Encoding.UTF8, "Application/json");
-                HttpResponseMessage response = await client.PostAsync(url, sendThis);
+                HttpResponseMessage response = await client.DeleteAsync(url);
                 response.EnsureSuccessStatusCode();
                 string result = await response.Content.ReadAsStringAsync();
-                jasondata data = JsonConvert.DeserializeObject<jasondata>(result);
+
                 return true;
             }
             catch (Exception e)

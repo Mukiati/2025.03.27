@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace _2025._03._27
 {
-    class jasondata
+    public class jasondata
     {
         public int id { get; set; }
         public string kolbaszNeve { get; set; }
